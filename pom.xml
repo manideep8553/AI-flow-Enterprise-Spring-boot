@@ -193,6 +193,13 @@
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
 
+        <!-- PDFBox for thumbnail & preview generation -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
         <!-- Logstash for JSON logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>

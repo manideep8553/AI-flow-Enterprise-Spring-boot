@@ -2,8 +2,13 @@ package com.aiflow.enterprise.entity;
 
 import com.aiflow.enterprise.entity.embedded.AnomalyResult;
 import com.aiflow.enterprise.entity.embedded.DocumentValidationResult;
+import com.aiflow.enterprise.entity.embedded.DocumentVersion;
 import com.aiflow.enterprise.entity.embedded.DuplicateInfo;
+import com.aiflow.enterprise.entity.embedded.EncryptionInfo;
 import com.aiflow.enterprise.entity.embedded.ExtractedField;
+import com.aiflow.enterprise.entity.embedded.LifecyclePolicy;
+import com.aiflow.enterprise.entity.embedded.StorageInfo;
+import com.aiflow.enterprise.entity.embedded.VirusScanResult;
 import com.aiflow.enterprise.enums.DocumentType;
 import com.aiflow.enterprise.enums.ProcessingStatus;
 import lombok.AllArgsConstructor;
@@ -58,6 +63,8 @@ public class Document extends BaseEntity {
 
     private String thumbnailS3Key;
 
+    private String previewS3Key;
+
     private String contentHash;
 
     private String ocrText;
@@ -73,6 +80,14 @@ public class Document extends BaseEntity {
     private List<AnomalyResult> anomalies;
 
     private DuplicateInfo duplicateInfo;
+
+    private VirusScanResult virusScanResult;
+
+    private EncryptionInfo encryptionInfo;
+
+    private LifecyclePolicy lifecyclePolicy;
+
+    private StorageInfo storageInfo;
 
     private String summary;
 
@@ -90,6 +105,8 @@ public class Document extends BaseEntity {
 
     private String category;
 
+    private double categoryConfidence;
+
     private String notes;
 
     @Builder.Default
@@ -97,4 +114,6 @@ public class Document extends BaseEntity {
 
     @Builder.Default
     private int version = 1;
+
+    private List<DocumentVersion> versionHistory;
 }

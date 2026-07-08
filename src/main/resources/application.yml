@@ -140,6 +140,41 @@ app:
         cron: 0 */15 * * * *
       analytics-aggregation:
         cron: 0 0 */6 * * *
+      document-lifecycle:
+        cron: 0 0 2 * * *
+      document-storage-optimization:
+        cron: 0 0 4 * * *
+
+  document:
+    thumbnail:
+      width: 256
+      height: 256
+      max-file-size-mb: 50
+    preview:
+      max-pages: 5
+      dpi: 150
+    virus-scan:
+      enabled: true
+      clamav-host: ${CLAMAV_HOST:localhost}
+      clamav-port: ${CLAMAV_PORT:3310}
+      connection-timeout-ms: 5000
+      max-file-size-mb: 100
+    encryption:
+      enabled: false
+      algorithm: AES-256
+      kms-key-id: ${AWS_KMS_KEY_ID:}
+    signed-url:
+      get-expiry-seconds: ${SIGNED_URL_GET_EXPIRY:900}
+      put-expiry-seconds: ${SIGNED_URL_PUT_EXPIRY:3600}
+    storage:
+      compression-threshold: 4096
+      default-storage-class: STANDARD
+    lifecycle:
+      default-retention-days: 365
+      notification-enabled: true
+    versioning:
+      max-versions-per-document: 10
+      enabled: true
 
   elasticsearch:
     url: ${ELASTICSEARCH_URL:}

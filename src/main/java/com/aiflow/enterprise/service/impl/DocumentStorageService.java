@@ -8,17 +8,26 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
+import software.amazon.awssdk.services.s3.model.StorageClass;
+import software.amazon.awssdk.services.s3.model.Tag;
+import software.amazon.awssdk.services.s3.model.Tagging;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DocumentStorageService {
@@ -29,7 +38,7 @@ public class DocumentStorageService {
     private final String bucketName;
 
     public DocumentStorageService(S3Client s3Client,
-                                  @Value("${app.aws.s3.bucket-name:}") String bucketName) {
+                                   @Value("${app.aws.s3.bucket-name:}") String bucketName) {
         this.s3Client = s3Client;
         this.bucketName = bucketName;
     }
@@ -47,6 +56,58 @@ public class DocumentStorageService {
         return key;
     }
 
+    public String uploadFile(byte[] data, String fileName, String contentType, String prefix) {
+        String key = prefix + "/" + UUID.randomUUID() + "_" + fileName;
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName).key(key)
+                .contentType(contentType)
+                .contentLength((long) data.length)
+                .build();
+        s3Client.putObject(request, RequestBody.fromBytes(data));
+        log.info("File uploaded to S3: bucket={} key={} size={}", bucketName, key, data.length);
+        return key;
+    }
+
+    public String uploadFileWithEncryption(byte[] data, String fileName, String contentType,
+                                            String prefix, String kmsKeyId) {
+        String key = prefix + "/" + UUID.randomUUID() + "_" + fileName;
+        PutObjectRequest.Builder builder = PutObjectRequest.builder()
+                .bucket(bucketName).key(key)
+                .contentType(contentType)
+                .contentLength((long) data.length);
+
+        if (kmsKeyId != null && !kmsKeyId.isBlank()) {
+            builder.serverSideEncryption(ServerSideEncryption.AWS_KMS)
+                    .ssekmsKeyId(kmsKeyId);
+        } else {
+            builder.serverSideEncryption(ServerSideEncryption.AES256);
+        }
+
+        s3Client.putObject(builder.build(), RequestBody.fromBytes(data));
+        log.info("Encrypted file uploaded to S3: key={}", key);
+        return key;
+    }
+
+    public String uploadFileWithTags(byte[] data, String fileName, String contentType,
+                                      String prefix, Map<String, String> tags) {
+        String key = prefix + "/" + UUID.randomUUID() + "_" + fileName;
+        Tagging tagging = Tagging.builder()
+                .tagSet(tags.entrySet().stream()
+                        .map(e -> Tag.builder().key(e.getKey()).value(e.getValue()).build())
+                        .collect(Collectors.toList()))
+                .build();
+
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName).key(key)
+                .contentType(contentType)
+                .contentLength((long) data.length)
+                .tagging(tagging)
+                .build();
+        s3Client.putObject(request, RequestBody.fromBytes(data));
+        log.info("Tagged file uploaded to S3: key={} tags={}", key, tags);
+        return key;
+    }
+
     public byte[] downloadFile(String s3Key) {
         try {
             GetObjectRequest request = GetObjectRequest.builder()
@@ -55,6 +116,21 @@ public class DocumentStorageService {
             return bytes.asByteArray();
         } catch (S3Exception e) {
             log.error("Failed to download file from S3: key={} error={}", s3Key, e.getMessage());
+            return null;
+        }
+    }
+
+    public String copyFile(String sourceKey, String destinationKey) {
+        try {
+            CopyObjectRequest request = CopyObjectRequest.builder()
+                    .sourceBucket(bucketName).sourceKey(sourceKey)
+                    .destinationBucket(bucketName).destinationKey(destinationKey)
+                    .build();
+            s3Client.copyObject(request);
+            log.info("File copied from {} to {}", sourceKey, destinationKey);
+            return destinationKey;
+        } catch (S3Exception e) {
+            log.error("Failed to copy file: key={} error={}", sourceKey, e.getMessage());
             return null;
         }
     }
@@ -70,6 +146,10 @@ public class DocumentStorageService {
         }
     }
 
+    public String getBucketName() {
+        return bucketName;
+    }
+
     public String getPublicUrl(String s3Key) {
         return "https://" + bucketName + ".s3.amazonaws.com/" + s3Key;
     }
@@ -81,6 +161,27 @@ public class DocumentStorageService {
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 not available", e);
+        }
+    }
+
+    public String computeContentHash(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data);
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
+        }
+    }
+
+    public String getStorageClass(String s3Key) {
+        try {
+            HeadObjectResponse response = s3Client.headObject(
+                    HeadObjectRequest.builder().bucket(bucketName).key(s3Key).build());
+            return response.storageClassAsString();
+        } catch (S3Exception e) {
+            log.warn("Failed to get storage class for key={}: {}", s3Key, e.getMessage());
+            return null;
         }
     }
 }

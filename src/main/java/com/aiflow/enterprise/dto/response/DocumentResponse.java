@@ -1,11 +1,6 @@
 package com.aiflow.enterprise.dto.response;
 
-import com.aiflow.enterprise.entity.embedded.AnomalyResult;
-import com.aiflow.enterprise.entity.embedded.DocumentValidationResult;
-import com.aiflow.enterprise.entity.embedded.DuplicateInfo;
-import com.aiflow.enterprise.entity.embedded.ExtractedField;
-import com.aiflow.enterprise.enums.DocumentType;
-import com.aiflow.enterprise.enums.ProcessingStatus;
+import com.aiflow.enterprise.entity.embedded.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,19 +23,26 @@ public class DocumentResponse {
     private String originalName;
     private String mimeType;
     private long fileSize;
-    private DocumentType documentType;
+    private String documentType;
     private double documentTypeConfidence;
-    private ProcessingStatus processingStatus;
+    private String processingStatus;
     private String uploadedBy;
     private Instant uploadedAt;
     private Instant processedAt;
     private String s3Url;
+    private String thumbnailUrl;
+    private String previewUrl;
+    private String contentHash;
     private String ocrMethod;
     private List<ExtractedField> extractedFields;
     private Map<String, Object> extractedData;
     private List<DocumentValidationResult> validationResults;
     private List<AnomalyResult> anomalies;
     private DuplicateInfo duplicateInfo;
+    private VirusScanResult virusScanResult;
+    private EncryptionInfo encryptionInfo;
+    private LifecyclePolicy lifecyclePolicy;
+    private StorageInfo storageInfo;
     private String summary;
     private String aiAnalysis;
     private String requestId;
@@ -48,8 +50,12 @@ public class DocumentResponse {
     private int pageCount;
     private List<String> tags;
     private String category;
+    private double categoryConfidence;
     private String notes;
     private boolean archived;
+    private int version;
+    private List<DocumentVersion> versionHistory;
     private Instant createdAt;
     private Instant updatedAt;
+    private String downloadUrl;
 }

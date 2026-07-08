@@ -112,6 +112,38 @@ app:
       bucket-name: ${AWS_S3_BUCKET:ai-flow-uploads}
       cdn-base-url: ${AWS_CDN_URL:}
 
+app:
+  scheduler:
+    stuck-job-monitor:
+      enabled: true
+      interval: 300000
+    jobs:
+      scheduled-workflow:
+        cron: 0 */5 * * * *
+      reminder-email:
+        cron: 0 0 */6 * * *
+      escalation-policy:
+        cron: 0 */30 * * * *
+      recurring-approval:
+        cron: 0 */15 * * * *
+      report-generation:
+        cron: 0 0 2 * * *
+      workflow-cleanup:
+        cron: 0 0 3 * * *
+      notification-retry:
+        cron: 0 */5 * * * *
+      ai-model-sync:
+        cron: 0 0 4 * * *
+      elasticsearch-indexing:
+        cron: 0 */30 * * * *
+      cache-refresh:
+        cron: 0 */15 * * * *
+      analytics-aggregation:
+        cron: 0 0 */6 * * *
+
+  elasticsearch:
+    url: ${ELASTICSEARCH_URL:}
+
 fraud:
   ml:
     service:

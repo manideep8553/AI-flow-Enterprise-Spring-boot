@@ -110,6 +110,10 @@ public class EmailService {
         sendEmail(to, subject, message);
     }
 
+    public void sendSimpleEmail(String to, String subject, String text) {
+        sendEmail(to, subject, text);
+    }
+
     private void sendEmail(String to, String subject, String text) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();

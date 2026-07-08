@@ -1,0 +1,16 @@
+package com.aiflow.enterprise.enums;
+
+public enum AuthAction {
+    LOGIN_SUCCESS,
+    LOGIN_FAILED,
+    LOGOUT,
+    REFRESH_TOKEN,
+    PASSWORD_RESET,
+    PASSWORD_CHANGE,
+    EMAIL_VERIFICATION,
+    ACCOUNT_LOCKED,
+    ACCOUNT_UNLOCKED,
+    TOKEN_REFRESHED,
+    SESSION_REVOKED,
+    OAUTH2_LOGIN_SUCCESS
+}

@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 20
+    connection-timeout: 5000
+  shutdown: graceful
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: aiflow_enterprise
+
+logging:
+  level:
+    root: WARN
+    com.aiflow: INFO
+    org.springframework: WARN
+    org.mongodb.driver: ERROR
+
+app:
+  environment: production

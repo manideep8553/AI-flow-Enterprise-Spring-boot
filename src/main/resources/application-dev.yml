@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/aiflow_enterprise_dev}
+      database: aiflow_enterprise_dev
+
+logging:
+  level:
+    root: INFO
+    com.aiflow: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.mongodb.driver: DEBUG
+
+app:
+  environment: development

@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: aiflow_enterprise_staging
+
+logging:
+  level:
+    root: INFO
+    com.aiflow: INFO
+    org.springframework.data.mongodb: WARN
+
+app:
+  environment: staging

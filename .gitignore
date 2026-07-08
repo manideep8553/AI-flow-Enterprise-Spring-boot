@@ -1,0 +1,49 @@
+# Java
+*.class
+*.jar
+*.war
+target/
+build/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.yml.enc
+
+# Docker
+docker-compose.override.yml
+
+# Maven
+dependency-reduced-pom.xml
+
+# Temp
+tmp/
+temp/
+
+# Application
+*.db
+application-local.yml

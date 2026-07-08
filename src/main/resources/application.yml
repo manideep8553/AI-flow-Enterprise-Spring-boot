@@ -1,0 +1,127 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+
+spring:
+  application:
+    name: ai-flow-enterprise
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/aiflow_enterprise}
+      database: aiflow_enterprise
+      auto-index-creation: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 4
+          max-wait: 2000ms
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: profile,email
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+          microsoft:
+            client-id: ${MICROSOFT_CLIENT_ID:}
+            client-secret: ${MICROSOFT_CLIENT_SECRET:}
+            scope: openid,profile,email,User.Read
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Microsoft
+        provider:
+          microsoft:
+            authorization-uri: https://login.microsoftonline.com/${MICROSOFT_TENANT_ID:common}/oauth2/v2.0/authorize
+            token-uri: https://login.microsoftonline.com/${MICROSOFT_TENANT_ID:common}/oauth2/v2.0/token
+            user-info-uri: https://graph.microsoft.com/v1.0/me
+            user-name-attribute: displayName
+            jwk-set-uri: https://login.microsoftonline.com/${MICROSOFT_TENANT_ID:common}/discovery/v2.0/keys
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: true
+
+app:
+  name: AIFlow Enterprise
+  version: 1.0.0
+  environment: ${APP_ENVIRONMENT:development}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:3000}
+    redirect-url: ${FRONTEND_REDIRECT_URL:http://localhost:3000/oauth2/redirect}
+
+  jwt:
+    access-token-secret: ${JWT_ACCESS_SECRET:aiflow-enterprise-access-token-secret-key-must-be-at-least-256-bits-long}
+    refresh-token-secret: ${JWT_REFRESH_SECRET:aiflow-enterprise-refresh-token-secret-key-must-be-at-least-256-bits-long}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION:900000}
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
+
+  auth:
+    max-failed-login-attempts: ${MAX_FAILED_ATTEMPTS:5}
+    lock-duration-minutes: ${LOCK_DURATION_MINUTES:30}
+
+  rate-limiting:
+    max-requests-per-minute: ${RATE_LIMIT_MAX:60}
+
+  aws:
+    access-key-id: ${AWS_ACCESS_KEY_ID:}
+    secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+    region: ${AWS_REGION:us-east-1}
+    s3:
+      bucket-name: ${AWS_S3_BUCKET:ai-flow-uploads}
+      cdn-base-url: ${AWS_CDN_URL:}
+
+fraud:
+  ml:
+    service:
+      url: ${FRAUD_ML_SERVICE_URL:http://localhost:8000}
+
+logging:
+  level:
+    root: INFO
+    com.aiflow: DEBUG
+    org.springframework.data.mongodb: WARN
+    org.springframework.web.client: INFO
+    org.mongodb.driver: WARN
+    org.springframework.security: INFO

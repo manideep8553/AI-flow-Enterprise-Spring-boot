@@ -176,6 +176,18 @@ app:
       max-versions-per-document: 10
       enabled: true
 
+  webhook:
+    default-connect-timeout-ms: 10000
+    default-read-timeout-ms: 30000
+    max-payload-size-bytes: 1048576
+    user-agent: AIFlow-Enterprise-Webhook/1.0
+    circuit-breaker:
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 30s
+      sliding-window-size: 10
+      minimum-number-of-calls: 5
+      permitted-number-of-calls-in-half-open-state: 3
+
   elasticsearch:
     url: ${ELASTICSEARCH_URL:}
 

@@ -478,4 +478,44 @@ export const api = {
   getSchedulerSummary: () => apiRequest<any>("/admin/scheduler/summary"),
   getSchedulerLocks: () => apiRequest<any[]>("/admin/scheduler/locks"),
   deleteSchedulerLock: (lockKey: string) => apiRequest<void>(`/admin/scheduler/locks/${lockKey}`, { method: "DELETE" }),
+
+  // Analytics
+  getAnalyticsSummary: (params?: { period?: string; department?: string; workflowId?: string }) =>
+    apiRequest<any>("/analytics/summary" + buildQueryString(params || {})),
+
+  getWorkflowAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/workflows" + buildQueryString({ period })),
+
+  getWorkflowMetrics: (period?: string) =>
+    apiRequest<any>("/analytics/workflows/metrics" + buildQueryString({ period })),
+
+  getRequestAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/requests" + buildQueryString({ period })),
+
+  getUserAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/users" + buildQueryString({ period })),
+
+  getDocumentAnalytics: () =>
+    apiRequest<any>("/analytics/documents"),
+
+  getFraudAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/fraud" + buildQueryString({ period })),
+
+  getNotificationAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/notifications" + buildQueryString({ period })),
+
+  getAIAnalytics: (period?: string) =>
+    apiRequest<any>("/analytics/ai" + buildQueryString({ period })),
+
+  getSchedulerAnalytics: () =>
+    apiRequest<any>("/analytics/scheduler"),
+
+  getBottlenecks: () =>
+    apiRequest<any[]>("/analytics/bottlenecks"),
+
+  getDepartmentAnalytics: (period?: string) =>
+    apiRequest<any[]>("/analytics/departments" + buildQueryString({ period })),
+
+  getKPI: (period?: string) =>
+    apiRequest<any>("/analytics/kpi" + buildQueryString({ period })),
 };

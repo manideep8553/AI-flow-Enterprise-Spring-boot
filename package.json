@@ -1,0 +1,9 @@
+{
+  "name": "ai-flow-enterprise",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install:frontend": "cd frontend && npm install"
+  }
+}

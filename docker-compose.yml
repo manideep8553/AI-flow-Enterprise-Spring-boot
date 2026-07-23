@@ -10,6 +10,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI:-mongodb://mongodb:27017/aiflow_enterprise_dev}
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/aiflow_enterprise_dev}
       APP_ENVIRONMENT: ${APP_ENVIRONMENT:-development}
       FRAUD_ML_SERVICE_URL: ${FRAUD_ML_SERVICE_URL:-http://fraud-ml-service:8000}

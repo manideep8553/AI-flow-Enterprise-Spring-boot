@@ -63,7 +63,7 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Job reportGenerationJob() {
+    public Job reportGenerationBatchJob() {
         return new JobBuilder("reportGenerationJob", jobRepository)
                 .start(reportGenerationStep())
                 .listener(completionListener)
@@ -71,7 +71,7 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Job workflowCleanupJob() {
+    public Job workflowCleanupBatchJob() {
         return new JobBuilder("workflowCleanupJob", jobRepository)
                 .start(workflowCleanupStep())
                 .listener(completionListener)

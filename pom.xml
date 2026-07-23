@@ -197,6 +197,13 @@
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
 
+        <!-- H2 for Spring Batch job repository (dev profile) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- PDFBox for thumbnail & preview generation -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

@@ -5,6 +5,7 @@ import com.aiflow.enterprise.engine.core.webhook.WebhookAuthProvider;
 import com.aiflow.enterprise.engine.core.webhook.WebhookCircuitBreakerManager;
 import com.aiflow.enterprise.engine.core.webhook.WebhookResponseValidator;
 import com.aiflow.enterprise.entity.WebhookExecutionHistory;
+import com.aiflow.enterprise.entity.embedded.WorkflowStep;
 import com.aiflow.enterprise.enums.StepType;
 import com.aiflow.enterprise.repository.WebhookExecutionHistoryRepository;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class WebhookStepProcessor implements StepProcessor {
@@ -130,7 +132,7 @@ public class WebhookStepProcessor implements StepProcessor {
         CircuitBreaker circuitBreaker = circuitBreakerManager.getOrCreate(resolvedUrl, cbConfig);
 
         Instant start = Instant.now();
-        int retryAttempt = 0;
+        AtomicInteger retryAttempt = new AtomicInteger(0);
         int totalRetries = step.getRetryConfig() != null ? step.getRetryConfig().getMaxAttempts() : 0;
         String lastError = null;
         int statusCode = 0;
@@ -146,7 +148,7 @@ public class WebhookStepProcessor implements StepProcessor {
                 for (int i = 0; i < Math.max(totalRetries, 1); i++) {
                     attempt++;
                     Instant callStart = Instant.now();
-                    retryAttempt = attempt;
+                    retryAttempt.set(attempt);
 
                     log.info("Webhook [{}] {} (attempt {}/{}, correlationId={})",
                             method, requestUri, attempt, Math.max(totalRetries, 1), correlationId);
@@ -172,7 +174,12 @@ public class WebhookStepProcessor implements StepProcessor {
                             long backoffMs = calculateBackoff(i, config);
                             log.info("Retrying webhook {} in {}ms (attempt {}/{})",
                                     requestUri, backoffMs, attempt, Math.max(totalRetries, 1));
-                            Thread.sleep(backoffMs);
+                            try {
+                                Thread.sleep(backoffMs);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
                         }
                     } catch (WebhookExecutionException e) {
                         err = e.getMessage();
@@ -215,7 +222,7 @@ public class WebhookStepProcessor implements StepProcessor {
         long executionTimeMs = Duration.between(start, Instant.now()).toMillis();
 
         saveHistory(resolvedUrl, step, ctx, config, correlationId, statusCode, executionTimeMs,
-                success, lastError, responseHeaders, sanitizeHeaders(headers), retryAttempt,
+                success, lastError, responseHeaders, sanitizeHeaders(headers), retryAttempt.get(),
                 totalRetries, responseBody, authProvider.getType());
 
         if (success) {
@@ -227,7 +234,7 @@ public class WebhookStepProcessor implements StepProcessor {
             output.put("responseHeaders", responseHeaders != null ? responseHeaders : Map.of());
             output.put("executionTimeMs", executionTimeMs);
             output.put("correlationId", correlationId);
-            output.put("retryAttempts", retryAttempt);
+            output.put("retryAttempts", retryAttempt.get());
             output.put("circuitBreakerState", circuitBreaker.getState().name());
 
             Map<String, Object> data = new HashMap<>();
@@ -272,7 +279,7 @@ public class WebhookStepProcessor implements StepProcessor {
                     .block();
         } catch (WebClientResponseException e) {
             Map<String, String> respHeaders = new HashMap<>();
-            e.getResponseHeaders().forEach((k, vs) ->
+            e.getHeaders().forEach((k, vs) ->
                     respHeaders.put(k, String.join(", ", vs)));
             return new WebhookResponse(
                     e.getStatusCode().value(),

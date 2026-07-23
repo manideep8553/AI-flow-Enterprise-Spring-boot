@@ -6,6 +6,14 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/aiflow_enterprise_dev}
       database: aiflow_enterprise_dev
+  batch:
+    jdbc:
+      initialize-schema: always
+  datasource:
+    url: jdbc:h2:mem:batchdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
 
 logging:
   level:

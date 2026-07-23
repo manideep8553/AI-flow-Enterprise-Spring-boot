@@ -578,21 +578,14 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private double computeAvgDurationMs(Instant since, Instant now) {
         try {
             Aggregation agg = newAggregation(
-                    match(Criteria.where("completedAt").exists(true)
-                            .and("startedAt").exists(true)
+                    match(Criteria.where("totalDurationMs").exists(true)
                             .and("completedAt").gte(since).lte(now)),
-                    project().and("startedAt").as("startedAt")
-                            .and("completedAt").as("completedAt"),
-                    group().avg(
-                            ConvertOperators.valueOf("completedAt")
-                                    .convertToLong()
-                                    .subtract(ConvertOperators.valueOf("startedAt").convertToLong()))
-                            .as("avgDurationMicros")
+                    group().avg("totalDurationMs").as("avgDurationMs")
             );
             var results = mongoTemplate.aggregate(agg, "workflow_executions", Map.class);
             var r = results.getUniqueMappedResult();
-            if (r != null && r.get("avgDurationMicros") != null)
-                return ((Number) r.get("avgDurationMicros")).doubleValue() / 1000.0;
+            if (r != null && r.get("avgDurationMs") != null)
+                return ((Number) r.get("avgDurationMs")).doubleValue();
         } catch (Exception e) {
             log.warn("Failed to compute avg duration: {}", e.getMessage());
         }
@@ -601,22 +594,20 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     private double computeAvgApprovalTimeHours(Instant since, Instant now) {
         try {
-            Aggregation agg = newAggregation(
-                    match(Criteria.where("completedAt").exists(true)
+            var results = mongoTemplate.find(
+                    Query.query(Criteria.where("completedAt").exists(true)
                             .and("submittedAt").exists(true)
-                            .and("completedAt").gte(since).lte(now)),
-                    project().and("submittedAt").as("submittedAt")
-                            .and("completedAt").as("completedAt"),
-                    group().avg(
-                            ConvertOperators.valueOf("completedAt")
-                                    .convertToLong()
-                                    .subtract(ConvertOperators.valueOf("submittedAt").convertToLong()))
-                            .as("avgDurationMicros")
-            );
-            var results = mongoTemplate.aggregate(agg, "requests", Map.class);
-            var r = results.getUniqueMappedResult();
-            if (r != null && r.get("avgDurationMicros") != null)
-                return ((Number) r.get("avgDurationMicros")).doubleValue() / 3_600_000_000.0;
+                            .and("completedAt").gte(since).lte(now))
+                            .with(Sort.by(Sort.Direction.DESC, "completedAt"))
+                            .limit(5000),
+                    Map.class, "requests");
+            if (results.isEmpty()) return 0;
+            return results.stream()
+                    .filter(r -> r.get("completedAt") instanceof Instant && r.get("submittedAt") instanceof Instant)
+                    .mapToLong(r -> ChronoUnit.MILLIS.between(
+                            (Instant) r.get("submittedAt"), (Instant) r.get("completedAt")))
+                    .average()
+                    .orElse(0) / 3_600_000.0;
         } catch (Exception e) {
             log.warn("Failed to compute avg approval time: {}", e.getMessage());
         }
@@ -706,9 +697,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             Aggregation agg = newAggregation(
                     match(Criteria.where(dateField).gte(since).lte(now)),
                     project().and(dateField).as("dt"),
-                    group()
-                            .and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period")
-                            .count().as("count"),
+                    project().and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period"),
+                    group("period").count().as("count"),
                     sort(Sort.Direction.ASC, "_id"),
                     project("count").and("_id").as("period").andExclude("_id")
             );
@@ -734,8 +724,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     match(Criteria.where("completedAt").gte(since).lte(now)
                             .and("status").in("APPROVED", "REJECTED")),
                     project().and("completedAt").as("dt").and("status").as("status"),
-                    group()
+                    project()
                             .and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period")
+                            .and("status").as("status"),
+                    group("period")
                             .count().as("count")
                             .sum(ConditionalOperators.when(
                                     Criteria.where("status").is("APPROVED")).then(1).otherwise(0))
@@ -771,9 +763,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     match(Criteria.where("timestamp").gte(since).lte(now)
                             .and("action").is("LOGIN")),
                     project().and("timestamp").as("dt"),
-                    group()
-                            .and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period")
-                            .count().as("count"),
+                    project().and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period"),
+                    group("period").count().as("count"),
                     sort(Sort.Direction.ASC, "_id"),
                     project("count").and("_id").as("period").andExclude("_id")
             );
@@ -798,8 +789,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             Aggregation agg = newAggregation(
                     match(Criteria.where("checkedAt").gte(since).lte(now)),
                     project().and("checkedAt").as("dt").and("riskLevel").as("riskLevel"),
-                    group()
+                    project()
                             .and(DateOperators.dateOf("dt").toString("%Y-%m-%d")).as("period")
+                            .and("riskLevel").as("riskLevel"),
+                    group("period")
                             .count().as("count")
                             .sum(ConditionalOperators.when(
                                     Criteria.where("riskLevel").in("HIGH", "CRITICAL"))

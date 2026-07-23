@@ -112,7 +112,6 @@ app:
       bucket-name: ${AWS_S3_BUCKET:ai-flow-uploads}
       cdn-base-url: ${AWS_CDN_URL:}
 
-app:
   scheduler:
     stuck-job-monitor:
       enabled: true

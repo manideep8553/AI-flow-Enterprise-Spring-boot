@@ -21,7 +21,6 @@ public class CacheConfig {
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5))
-                .prefixName("analytics:")
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(
@@ -33,8 +32,7 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .withCacheConfiguration("analytics-summary",
                         RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(2))
-                                .prefixName("analytics:"))
+                                .entryTtl(Duration.ofMinutes(2)))
                 .build();
     }
 }

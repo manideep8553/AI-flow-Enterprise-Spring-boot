@@ -21,6 +21,7 @@ import { FraudDetectionPage } from "../pages/fraud/FraudDetectionPage";
 import { AnalyticsPage } from "../pages/analytics/AnalyticsPage";
 import { UserManagementPage } from "../pages/admin/UserManagementPage";
 import { OrganizationsPage } from "../pages/admin/OrganizationsPage";
+import { OrganizationDetailPage } from "../pages/admin/OrganizationDetailPage";
 import { SchedulerPage } from "../pages/scheduler/SchedulerPage";
 import { ProfilePage } from "../pages/profile/ProfilePage";
 import { SettingsPage } from "../pages/settings/SettingsPage";
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: "analytics", element: <AnalyticsPage /> },
       { path: "users", element: <UserManagementPage /> },
       { path: "organizations", element: <OrganizationsPage /> },
+      { path: "organizations/:id", element: <OrganizationDetailPage /> },
       { path: "scheduler", element: <SchedulerPage /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "settings", element: <SettingsPage /> },

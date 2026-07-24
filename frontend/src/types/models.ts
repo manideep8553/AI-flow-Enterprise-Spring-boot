@@ -375,11 +375,48 @@ export interface Organization {
   email?: string;
   phone?: string;
   website?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  logoUrl?: string;
   description?: string;
   industry?: string;
   employeeCount?: number;
   active: boolean;
   createdBy: string;
+  domains?: string[];
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrganizationSetting {
+  id?: string;
+  organizationId?: string;
+  allowSelfRegistration: boolean;
+  requireEmailVerification: boolean;
+  requireAdminApprovalForNewUsers: boolean;
+  defaultTimezone: string;
+  defaultLocale: string;
+  dateFormat: string;
+  timeFormat: string;
+  startOfWeek: string;
+  maxFailedLoginAttempts: number;
+  passwordExpiryDays: number;
+  sessionTimeoutMinutes: number;
+  enableTwoFactorAuth: boolean;
+  enableAuditLogging: boolean;
+  leavePolicy?: string;
+  workDays?: string;
+  workHoursStart?: string;
+  workHoursEnd?: string;
+  holidayList?: Record<string, unknown>;
+  customSettings?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Department {
@@ -390,7 +427,57 @@ export interface Department {
   description?: string;
   headEmployeeId?: string;
   parentDepartmentId?: string;
+  costCenter?: string;
   active: boolean;
+  email?: string;
+  phone?: string;
+  location?: string;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Team {
+  id: string;
+  organizationId: string;
+  departmentId: string;
+  name: string;
+  description?: string;
+  leadEmployeeId?: string;
+  active: boolean;
+  email?: string;
+  slackChannel?: string;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BusinessUnit {
+  id: string;
+  organizationId: string;
+  name: string;
+  code?: string;
+  description?: string;
+  headEmployeeId?: string;
+  budgetCode?: string;
+  active: boolean;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Designation {
+  id: string;
+  organizationId: string;
+  title: string;
+  description?: string;
+  level?: number;
+  grade?: string;
+  skills?: string[];
+  careerPath?: string;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EmployeeProfile {
@@ -398,19 +485,54 @@ export interface EmployeeProfile {
   userId: string;
   organizationId: string;
   employeeId: string;
-  departmentId: string;
-  departmentName: string;
-  designationTitle: string;
+  departmentId?: string;
+  departmentName?: string;
+  teamIds?: string[];
+  teamNames?: string[];
+  businessUnitIds?: string[];
+  designationId?: string;
+  designationTitle?: string;
   reportingManagerId?: string;
+  reportingManagerName?: string;
   status: string;
   employmentType: string;
-  joiningDate: string;
-  workEmail: string;
+  joiningDate?: string;
+  exitDate?: string;
+  exitReason?: string;
+  workEmail?: string;
   workPhone?: string;
-  firstName: string;
-  lastName: string;
+  extension?: string;
+  officeLocation?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  personalEmail?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  maritalStatus?: string;
+  nationality?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelation?: string;
   profileImageUrl?: string;
+  bio?: string;
   skills?: string[];
+  customFields?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrganizationHierarchyNode {
+  id: string;
+  name: string;
+  type: "organization" | "business-unit" | "department" | "team";
+  children?: OrganizationHierarchyNode[];
 }
 
 export interface UserPreference {

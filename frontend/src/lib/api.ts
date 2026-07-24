@@ -424,20 +424,59 @@ export const api = {
   deleteOrganization: (id: string) => apiRequest<void>(`/organizations/${id}`, { method: "DELETE" }),
   toggleOrganization: (id: string) => apiRequest<void>(`/organizations/${id}/toggle-active`, { method: "PATCH" }),
 
+  // Organization Settings
+  getOrganizationSettings: (orgId: string) =>
+    apiRequest<any>(`/organizations/${orgId}/settings`),
+  updateOrganizationSettings: (orgId: string, data: any) =>
+    apiRequest<any>(`/organizations/${orgId}/settings`, { method: "PUT", body: JSON.stringify(data) }),
+
   // Departments
-  getDepartments: (orgId: string) => apiRequest<any[]>(`/organizations/${orgId}/departments`),
+  getDepartments: (orgId: string, params?: { page?: number; size?: number; search?: string; active?: boolean }) =>
+    apiRequest<{ content: any[]; totalElements: number; totalPages: number; number: number; size: number }>
+      (`/organizations/${orgId}/departments` + buildQueryString(params || {})),
   getDepartment: (orgId: string, id: string) => apiRequest<any>(`/organizations/${orgId}/departments/${id}`),
   createDepartment: (orgId: string, data: any) => apiRequest<any>(`/organizations/${orgId}/departments`, { method: "POST", body: JSON.stringify(data) }),
   updateDepartment: (orgId: string, id: string, data: any) => apiRequest<any>(`/organizations/${orgId}/departments/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteDepartment: (orgId: string, id: string) => apiRequest<void>(`/organizations/${orgId}/departments/${id}`, { method: "DELETE" }),
   toggleDepartment: (orgId: string, id: string) => apiRequest<void>(`/organizations/${orgId}/departments/${id}/toggle-active`, { method: "PATCH" }),
 
+  // Teams
+  getTeams: (deptId: string, params?: { page?: number; size?: number; search?: string }) =>
+    apiRequest<{ content: any[]; totalElements: number; totalPages: number; number: number; size: number }>
+      (`/departments/${deptId}/teams` + buildQueryString(params || {})),
+  getTeam: (id: string) => apiRequest<any>(`/departments/teams/${id}`),
+  createTeam: (deptId: string, data: any) => apiRequest<any>(`/departments/${deptId}/teams`, { method: "POST", body: JSON.stringify(data) }),
+  updateTeam: (id: string, data: any) => apiRequest<any>(`/departments/teams/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteTeam: (id: string) => apiRequest<void>(`/departments/teams/${id}`, { method: "DELETE" }),
+
+  // Business Units
+  getBusinessUnits: (orgId: string, params?: { page?: number; size?: number; active?: boolean }) =>
+    apiRequest<{ content: any[]; totalElements: number; totalPages: number; number: number; size: number }>
+      (`/organizations/${orgId}/business-units` + buildQueryString(params || {})),
+  getBusinessUnit: (id: string) => apiRequest<any>(`/organizations/business-units/${id}`),
+  createBusinessUnit: (orgId: string, data: any) => apiRequest<any>(`/organizations/${orgId}/business-units`, { method: "POST", body: JSON.stringify(data) }),
+  updateBusinessUnit: (id: string, data: any) => apiRequest<any>(`/organizations/business-units/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteBusinessUnit: (id: string) => apiRequest<void>(`/organizations/business-units/${id}`, { method: "DELETE" }),
+
+  // Designations
+  getDesignations: (orgId: string, params?: { page?: number; size?: number; search?: string }) =>
+    apiRequest<{ content: any[]; totalElements: number; totalPages: number; number: number; size: number }>
+      (`/organizations/${orgId}/designations` + buildQueryString(params || {})),
+  getDesignation: (id: string) => apiRequest<any>(`/organizations/designations/${id}`),
+  createDesignation: (orgId: string, data: any) => apiRequest<any>(`/organizations/${orgId}/designations`, { method: "POST", body: JSON.stringify(data) }),
+  updateDesignation: (id: string, data: any) => apiRequest<any>(`/organizations/designations/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteDesignation: (id: string) => apiRequest<void>(`/organizations/designations/${id}`, { method: "DELETE" }),
+
   // Employees
-  getEmployees: (orgId: string, params?: { page?: number; size?: number }) =>
-    apiRequest<{ content: any[]; totalElements: number; totalPages: number }>(`/organizations/${orgId}/employees` + buildQueryString(params || {})),
+  getEmployees: (orgId: string, params?: { page?: number; size?: number; departmentId?: string; status?: string; search?: string }) =>
+    apiRequest<{ content: any[]; totalElements: number; totalPages: number; number: number; size: number }>
+      (`/organizations/${orgId}/employees` + buildQueryString(params || {})),
   getEmployee: (orgId: string, id: string) => apiRequest<any>(`/organizations/${orgId}/employees/${id}`),
+  getEmployeeByUserId: (userId: string) => apiRequest<any>(`/organizations/employees/by-user/${userId}`),
   createEmployee: (orgId: string, data: any) => apiRequest<any>(`/organizations/${orgId}/employees`, { method: "POST", body: JSON.stringify(data) }),
   updateEmployee: (orgId: string, id: string, data: any) => apiRequest<any>(`/organizations/${orgId}/employees/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  updateEmployeeStatus: (id: string, status: string) => apiRequest<any>(`/organizations/employees/${id}/status?status=${encodeURIComponent(status)}`, { method: "PATCH" }),
+  deleteEmployee: (id: string) => apiRequest<void>(`/organizations/employees/${id}`, { method: "DELETE" }),
 
   // Notifications
   getNotifications: (params?: { page?: number; size?: number; read?: boolean; type?: string }) =>
